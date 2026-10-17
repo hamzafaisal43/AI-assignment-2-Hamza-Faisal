@@ -1,0 +1,124 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Churn Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #eef2f7;
+            margin: 0;
+            padding: 30px 15px;
+            color: #1e293b;
+        }
+        .container {
+            max-width: 850px;
+            margin: auto;
+            background: white;
+            padding: 28px;
+            border-radius: 14px;
+            box-shadow: 0 5px 20px #00000012;
+        }
+        h1 { text-align: center; color: #173b70; }
+        .subtitle { text-align: center; color: #64748b; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+        label { display: block; font-weight: bold; margin-bottom: 6px; }
+        input, select {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 11px;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+            background: white;
+        }
+        button {
+            width: 100%;
+            margin-top: 22px;
+            padding: 14px;
+            background: #2563eb;
+            color: white;
+            border: 0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover { background: #1d4ed8; }
+        .result, .error {
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .result { background: #dcfce7; color: #166534; }
+        .error { background: #fee2e2; color: #991b1b; }
+        .field { margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Customer Churn Prediction</h1>
+    <p class="subtitle">Enter customer details to predict whether the customer may leave.</p>
+
+    <form method="POST">
+        <div class="grid">
+            {% for field, options in categories.items() %}
+            <div class="field">
+                <label for="{{ field }}">{{ field }}</label>
+                <select id="{{ field }}" name="{{ field }}" required>
+                    {% for option in options %}
+                    <option value="{{ option }}"
+                    {% if submitted.get(field, defaults[field]) == option %}selected{% endif %}>
+                        {{ option }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endfor %}
+
+            <div class="field">
+                <label for="SeniorCitizen">Senior Citizen</label>
+                <select id="SeniorCitizen" name="SeniorCitizen">
+                    <option value="0" {% if submitted.get('SeniorCitizen', '0') == '0' %}selected{% endif %}>No</option>
+                    <option value="1" {% if submitted.get('SeniorCitizen', '0') == '1' %}selected{% endif %}>Yes</option>
+                </select>
+            </div>
+
+            {% for field in ['tenure', 'MonthlyCharges', 'TotalCharges'] %}
+            <div class="field">
+                <label for="{{ field }}">{{ field }}</label>
+                <input type="number" id="{{ field }}" name="{{ field }}"
+                       value="{{ submitted.get(field, defaults[field]) }}"
+                       min="{{ 0 if field != 'tenure' else 0 }}"
+                       {% if field == 'tenure' %}max="72" step="1"{% else %}step="0.01"{% endif %}
+                       required>
+            </div>
+            {% endfor %}
+        </div>
+
+        <button type="submit">Predict Customer Churn</button>
+    </form>
+
+    {% if prediction %}
+    <div class="result">
+        <h2>Prediction: {{ prediction }}</h2>
+        {% if probability is not none %}
+        <p>Estimated churn probability: {{ probability }}%</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if error %}
+    <div class="error">
+        <strong>Error:</strong> {{ error }}
+    </div>
+    {% endif %}
+</div>
+</body>
+</html>
